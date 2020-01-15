@@ -44,7 +44,7 @@
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:ox_coi/src/utils/keyMapping.dart';
 import 'package:test/test.dart';
-import 'package:test_api/src/backend/invoker.dart';
+
 
 import 'setup/global_consts.dart';
 import 'setup/helper_methods.dart';
@@ -55,40 +55,28 @@ void main() {
     var setup = Setup();
     setup.perform();
 
-    SerializableFinder userSettingsUsernameLabelFinder = find.byValueKey(keyUserSettingsUserSettingsUsernameLabel);
-    SerializableFinder userProfileUserNameTextFinder = find.text(testUserNameUserProfile);
+    final testUserNameUserProfile = 'EDN tester';
+    final profileUserStatus = 'Sent with OX COI Messenger - https://coi.me';
+    final userProfileStatusTextFinder = find.text(profileUserStatus);
 
     test('Test create profile integration tests.', () async {
-      await getAuthentication(
-        setup.driver,
-        signInFinder,
-        coiDebugProviderFinder,
-        providerEmailFinder,
-        realEmail,
-        providerPasswordFinder,
-        realPassword,
-      );
-
-      await catchScreenshot(setup.driver, 'screenshots/signInDone.png');
       await setup.driver.waitFor(chatWelcomeFinder);
       await setup.driver.tap(profileFinder);
       await setup.driver.waitFor(userProfileEmailTextFinder);
       await setup.driver.waitFor(userProfileStatusTextFinder);
-      print("Check E-Mail and status ok.");
-      print('\nGet Profile');
+
       await setup.driver.tap(userProfileEditRaisedButtonFinder);
-      Invoker.current.heartbeat();
       print('\nGet user Edit user settings to edit username.');
-      await setup.driver.tap(userSettingsUsernameLabelFinder);
+      await setup.driver.tap(find.byValueKey(keyUserSettingsUserSettingsUsernameLabel));
       await setup.driver.enterText(testUserNameUserProfile);
+
       print('\nGet Profile after changes saved and check changes.');
+
       await setup.driver.tap(userSettingsCheckIconButtonFinder);
-      await setup.driver.waitFor(userProfileUserNameTextFinder);
+      expect(await setup.driver.getText(find.text(testUserNameUserProfile)), testUserNameUserProfile);
       await setup.driver.waitFor(userProfileEmailTextFinder);
-      await setup.driver.waitFor(userProfileStatusTextFinder);
+      expect(await setup.driver.getText(find.text(profileUserStatus)), profileUserStatus);
       print("\nUser name, status, email after edited profile is ok.");
-      Invoker.current.heartbeat();
-      await catchScreenshot(setup.driver, 'screenshots/UserChangeProfile.png');
       await navigateTo(setup.driver, chat);
     });
   });

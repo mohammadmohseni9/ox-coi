@@ -65,16 +65,6 @@ void main() {
     setup.perform();
 
     test('Create a chat, swipe and delete created chat.', () async {
-      await getAuthentication(
-        setup.driver,
-        signInFinder,
-        coiDebugProviderFinder,
-        providerEmailFinder,
-        realEmail,
-        providerPasswordFinder,
-        realPassword,
-      );
-
       //  Create contact which will be swiped and deleted.
       await createNewChat(
         setup.driver,

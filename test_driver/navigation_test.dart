@@ -61,16 +61,6 @@ void main() {
     SerializableFinder settingsUserSettingsUsernameLabelFinder = find.byValueKey(keyUserSettingsUserSettingsUsernameLabel);
 
     test('Test Create chat list integration tests.', () async {
-      //  Check real authentication and get chat.
-      await getAuthentication(
-        setup.driver,
-        signInFinder,
-        coiDebugProviderFinder,
-        providerEmailFinder,
-        realEmail,
-        providerPasswordFinder,
-        realPassword,
-      );
 
       await setup.driver.tap(profileFinder);
       await setup.driver.tap(contactsFinder);

@@ -54,17 +54,9 @@ void main() {
     var setup = Setup();
     setup.perform();
 
-    test('Test Create chat list integration tests.', () async {
-      await getAuthentication(
-        setup.driver,
-        signInFinder,
-        coiDebugProviderFinder,
-        providerEmailFinder,
-        realEmail,
-        providerPasswordFinder,
-        realPassword,
-      );
+    const searchString = 'Douglas0';
 
+    test('Test Create chat list integration tests.', () async {
       //  Create first Me contact.
       await createNewChat(
         setup.driver,
@@ -112,7 +104,7 @@ void main() {
         find.byValueKey(keyChatListSearchIconButton),
         keySearchReturnIconButton,
       );
-    });
+    },timeout: Timeout(Duration(seconds: 60)));
   });
 }
 

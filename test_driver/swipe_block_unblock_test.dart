@@ -69,20 +69,7 @@ void main() {
     final block = 'Block';
 
     test('Get login and create one contact.', () async {
-      //  Check real authentication and get chat.
-      await getAuthentication(
-        setup.driver,
-        signInFinder,
-        coiDebugProviderFinder,
-        providerEmailFinder,
-        realEmail,
-        providerPasswordFinder,
-        realPassword,
-      );
-
-      Invoker.current.heartbeat();
       await setup.driver.waitFor(chatWelcomeFinder);
-      Invoker.current.heartbeat();
 
       //  Get contacts and add new contacts.
       await setup.driver.tap(contactsFinder);

@@ -76,16 +76,6 @@ void main() {
     final textToDeleteFinder = find.text(textToDelete);
 
     test('Test block / unblock functionality.', () async {
-      //  Check real authentication and get chat.
-      await getAuthentication(
-        setup.driver,
-        signInFinder,
-        coiDebugProviderFinder,
-        providerEmailFinder,
-        realEmail,
-        providerPasswordFinder,
-        realPassword,
-      );
 
       Invoker.current.heartbeat();
       await setup.driver.waitFor(chatWelcomeFinder);

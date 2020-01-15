@@ -63,18 +63,10 @@ void main() {
     final popupItemSendMessage = "Send message";
     final searchNew = "new";
     final groupParticipants = "3 participants";
+    const newTestContact03 = 'enyakam3@ox.com';
 
     test('Test group chat functionality.', () async {
       //  Check real authentication and get chat.
-      await getAuthentication(
-        setup.driver,
-        signInFinder,
-        coiDebugProviderFinder,
-        providerEmailFinder,
-        realEmail,
-        providerPasswordFinder,
-        realPassword,
-      );
       Invoker.current.heartbeat();
 
       await navigateTo(setup.driver, contacts);

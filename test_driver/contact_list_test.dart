@@ -61,16 +61,6 @@ void main() {
 
     test('Test create profile integration tests.', () async {
       //  Check real authentication and get chat.
-      await getAuthentication(
-        setup.driver,
-        signInFinder,
-        coiDebugProviderFinder,
-        providerEmailFinder,
-        realEmail,
-        providerPasswordFinder,
-        realPassword,
-      );
-
       Invoker.current.heartbeat();
       await setup.driver.waitFor(chatWelcomeFinder);
       Invoker.current.heartbeat();

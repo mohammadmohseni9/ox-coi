@@ -55,7 +55,6 @@
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:ox_coi/src/l10n/l.dart';
 import 'package:test/test.dart';
-import 'package:test_api/src/backend/invoker.dart';
 
 import 'setup/global_consts.dart';
 import 'setup/helper_methods.dart';
@@ -71,24 +70,12 @@ void main() {
     final expertExportKeys = 'Expert: Export keys';
 
     test('Test Create chat list integration tests.', () async {
-      //  Check real authentication and get chat.
-      await getAuthentication(
-        setup.driver,
-        signInFinder,
-        coiDebugProviderFinder,
-        providerEmailFinder,
-        realEmail,
-        providerPasswordFinder,
-        realPassword,
-      );
-
       //To do
       //Catch test Export success toast message with the driver.
       //Catch test failed  toast message with the driver.
       await setup.driver.waitFor(chatWelcomeFinder);
       await setup.driver.tap(profileFinder);
       await setup.driver.tap(userProfileSettingsAdaptiveIconFinder);
-      Invoker.current.heartbeat();
       await setup.driver.tap(find.text(security));
 
       await setup.driver.tap(find.text(expertImportKeys));

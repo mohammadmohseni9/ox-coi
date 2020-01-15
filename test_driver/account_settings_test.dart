@@ -71,52 +71,35 @@ void main() {
     final realServer = 'mobile-coi.open-xchange.com';
 
     test('Test create profile integration tests.', () async {
-      //  Check real authentication and get chat.
-      await getAuthentication(
-        setup.driver,
-        signInFinder,
-        coiDebugProviderFinder,
-        providerEmailFinder,
-        realEmail,
-        providerPasswordFinder,
-        realPassword,
-      );
 
-      Invoker.current.heartbeat();
       await setup.driver.tap(profileFinder);
       await setup.driver.tap(userProfileSettingsAdaptiveIconFinder);
 
       await setup.driver.tap(find.text(account));
       await setup.driver.tap(userAccountAdaptiveIconButtonIconCheckFinder);
-      Invoker.current.heartbeat();
 
       // Case realPassword and fake IMAP server.
-      Invoker.current.heartbeat();
       await setup.driver.tap(settingsManuelFormValidatableTextFormFieldPasswordFieldFinder);
       await setup.driver.enterText(realPassword);
       await setup.driver.tap(settingsManuelFormValidatableTextFormFieldImapServerFieldFinder);
-      Invoker.current.heartbeat();
+
       await setup.driver.enterText(fakeIMAPCoiServer);
       await setup.driver.tap(userAccountAdaptiveIconButtonIconCheckFinder);
-      Invoker.current.heartbeat();
       await setup.driver.tap(find.text(ok));
 
       // Case realPassword and fakeIMAPServer and fakeSMTPServer.
       await setup.driver.tap(settingsManuelFormValidatableTextFormFieldImapServerFieldFinder);
       await setup.driver.enterText(fakeSMTPCoiServer);
       await setup.driver.tap(userAccountAdaptiveIconButtonIconCheckFinder);
-      Invoker.current.heartbeat();
       await setup.driver.tap(find.text(ok));
 
       // Case FakePassword and fakeIMAPServer and fakeSMTPServer.
-      Invoker.current.heartbeat();
       await setup.driver.tap(settingsManuelFormValidatableTextFormFieldPasswordFieldFinder);
       await setup.driver.enterText(helloWorld);
       await setup.driver.tap(userAccountAdaptiveIconButtonIconCheckFinder);
       await setup.driver.tap(find.text(ok));
 
       // Case realPassword and realIMAPServer and realSMTPServer.
-      Invoker.current.heartbeat();
       await setup.driver.tap(settingsManuelFormValidatableTextFormFieldPasswordFieldFinder);
       await setup.driver.enterText(realPassword);
       await setup.driver.tap(settingsManuelFormValidatableTextFormFieldImapServerFieldFinder);
