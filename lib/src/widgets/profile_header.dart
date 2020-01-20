@@ -46,7 +46,9 @@ import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ox_coi/src/adaptiveWidgets/adaptive_icon.dart';
+import 'package:ox_coi/src/adaptiveWidgets/adaptive_icon_button.dart';
 import 'package:ox_coi/src/adaptiveWidgets/adaptive_ink_well.dart';
+import 'package:ox_coi/src/adaptiveWidgets/adaptive_superellipse_icon.dart';
 import 'package:ox_coi/src/l10n/l.dart';
 import 'package:ox_coi/src/l10n/l10n.dart';
 import 'package:ox_coi/src/navigation/navigation.dart';
@@ -65,6 +67,7 @@ class ProfileData extends InheritedWidget {
   final IconSource iconData;
   final TextStyle textStyle;
   final Function imageActionCallback;
+  final String avatarPath;
 
   const ProfileData({
     Key key,
@@ -74,6 +77,7 @@ class ProfileData extends InheritedWidget {
     this.iconData,
     this.textStyle,
     this.imageActionCallback,
+    this.avatarPath,
   })  : assert(child != null),
         super(key: key, child: child);
 
@@ -197,6 +201,48 @@ class ProfileAvatar extends StatelessWidget {
                   onTap: _editPhoto,
                 )))
       ],
+    );
+  }
+}
+
+class NewProfileAvatar extends StatelessWidget {
+  const NewProfileAvatar({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: <Widget>[
+        Avatar(
+          imagePath: ProfileData.of(context).avatarPath,
+          color: ProfileData.of(context).color,
+          size: profileAvatarSize,
+          textPrimary: ProfileData.of(context).text,
+        ),
+        AdaptiveIcon(
+          icon: IconSource.camera,
+          color: CustomTheme.of(context).accent,
+        ),
+      ],
+    );
+  }
+}
+
+class ProfileHeaderEditButton extends StatelessWidget {
+  const ProfileHeaderEditButton({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      right: 16.0,
+      child: AdaptiveIconButton(
+        icon: AdaptiveSuperellipseIcon(
+          color: CustomTheme.of(context).onBackground.withOpacity(barely),
+          icon: IconSource.edit,
+          iconColor: CustomTheme.of(context).accent,
+        ),
+        onPressed: ProfileData.of(context).imageActionCallback,
+      ),
     );
   }
 }

@@ -47,7 +47,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ox_coi/src/adaptiveWidgets/adaptive_icon.dart';
 import 'package:ox_coi/src/adaptiveWidgets/adaptive_icon_button.dart';
-import 'package:ox_coi/src/adaptiveWidgets/adaptive_raised_button.dart';
 import 'package:ox_coi/src/data/config.dart';
 import 'package:ox_coi/src/invite/invite_bloc.dart';
 import 'package:ox_coi/src/invite/invite_event_state.dart';
@@ -59,7 +58,6 @@ import 'package:ox_coi/src/navigation/navigation.dart';
 import 'package:ox_coi/src/qr/qr.dart';
 import 'package:ox_coi/src/ui/color.dart';
 import 'package:ox_coi/src/ui/custom_theme.dart';
-import 'package:ox_coi/src/ui/dimensions.dart';
 import 'package:ox_coi/src/user/user_bloc.dart';
 import 'package:ox_coi/src/user/user_event_state.dart';
 import 'package:ox_coi/src/user/user_settings.dart';
@@ -161,13 +159,69 @@ class _ProfileState extends State<UserProfile> {
   }
 
   Widget buildProfileView(Config config) {
-    return Container(
-      constraints: BoxConstraints.expand(),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Padding(
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints viewportConstraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: viewportConstraints.maxHeight,
+            ),
+            child: IntrinsicHeight(
+              child: Container(
+                color: CustomTheme.of(context).background,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 24.0),
+                  child: Column(
+                    children: <Widget>[
+                      Stack(
+                        children: <Widget>[
+                          Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                ProfileData(
+                                  color: CustomTheme.of(context).onBackground.withOpacity(barely),
+                                  avatarPath: config.avatarPath,
+                                  child: NewProfileAvatar(),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.only(top: 24.0, bottom: 8.0),
+                                  child: PlaceholderText(
+                                    text: config.username,
+                                    style: Theme.of(context).textTheme.body1.apply(color: CustomTheme.of(context).onSurface),
+                                    align: TextAlign.center,
+                                    placeholderText: L10n.get(L.profileNoUsername),
+                                    placeholderStyle:
+                                    Theme.of(context).textTheme.body1.apply(color: CustomTheme.of(context).onSurface.withOpacity(disabled)),
+                                    placeHolderAlign: TextAlign.center,
+                                  ),
+                                ),
+                                ProfileData(
+                                  text: config.email,
+                                  textStyle: Theme.of(context).textTheme.caption.apply(color: CustomTheme.of(context).onSurface.withOpacity(fade)),
+                                  child: ProfileHeaderText(),
+                                ),
+                              ],
+                            ),
+                          ),
+                          ProfileData(
+                            child: ProfileHeaderEditButton(),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /*Padding(
               padding: EdgeInsets.symmetric(vertical: profileSectionsVerticalPadding),
               child: buildAvatar(config),
             ),
@@ -225,13 +279,7 @@ class _ProfileState extends State<UserProfile> {
               color: CustomTheme.of(context).accent,
               textColor: CustomTheme.of(context).onAccent,
               key: Key(""),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
+            ),*/
   ProfileData buildAvatar(Config config) {
     return ProfileData(
         color: CustomTheme.of(context).accent,
