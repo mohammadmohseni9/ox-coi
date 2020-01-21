@@ -140,7 +140,7 @@ class _ChatCreateGroupSettingsState extends State<ChatCreateGroupSettings> with 
         Align(
             alignment: Alignment.center,
             child: ProfileData(
-              color: CustomTheme.of(context).accent,
+              imageBackgroundcolor: CustomTheme.of(context).accent,
               imageActionCallback: _setAvatar,
               child: ProfileAvatar(
                 imagePath: _avatar,

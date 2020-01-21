@@ -63,6 +63,12 @@ class UserPersonalDataChanged extends UserChangeEvent {
   UserPersonalDataChanged({@required this.username, @required this.status, @required this.avatarPath});
 }
 
+class UserAvatarChanged extends UserChangeEvent {
+  final String avatarPath;
+
+  UserAvatarChanged({@required this.avatarPath});
+}
+
 class UserAccountDataChanged extends UserChangeEvent {
   final String imapLogin;
   final String imapPassword;

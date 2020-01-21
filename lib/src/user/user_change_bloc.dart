@@ -75,6 +75,12 @@ class UserChangeBloc extends Bloc<UserChangeEvent, UserChangeState> {
       } catch (error) {
         yield UserChangeStateFailure(error: error.toString());
       }
+    } else if (event is UserAvatarChanged) {
+      try {
+        _saveUserAvatar(event);
+      } catch (error) {
+        yield UserChangeStateFailure(error: error.toString());
+      }
     } else if (event is ChangesApplied) {
       yield UserChangeStateApplied();
     }
@@ -90,6 +96,13 @@ class UserChangeBloc extends Bloc<UserChangeEvent, UserChangeState> {
     Config config = Config();
     await config.setValue(Context.configDisplayName, event.username);
     await config.setValue(Context.configSelfStatus, event.status);
+    var avatarPath = event.avatarPath;
+    await config.setValue(Context.configSelfAvatar, avatarPath);
+    add(ChangesApplied());
+  }
+
+  void _saveUserAvatar(UserAvatarChanged event) async {
+    Config config = Config();
     var avatarPath = event.avatarPath;
     await config.setValue(Context.configSelfAvatar, avatarPath);
     add(ChangesApplied());

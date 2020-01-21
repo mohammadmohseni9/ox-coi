@@ -48,11 +48,27 @@ import 'package:ox_coi/src/adaptiveWidgets/adaptive_superellipse_icon.dart';
 import 'package:ox_coi/src/ui/custom_theme.dart';
 import 'package:ox_coi/src/ui/dimensions.dart';
 
+enum SettingsItemName {
+  flagged,
+  qrShow,
+  invite,
+  notification,
+  chat,
+  signature,
+  serverSetting,
+  darkMode,
+  dataProtection,
+  blocked,
+  encryption,
+  about,
+  feedback,
+}
+
 class SettingsItem extends StatelessWidget {
   final IconSource icon;
   final Color iconBackground;
   final String text;
-  final Function onTap;
+  final onTap;
 
   SettingsItem({@required this.icon, @required this.iconBackground, @required this.text, @required this.onTap});
 

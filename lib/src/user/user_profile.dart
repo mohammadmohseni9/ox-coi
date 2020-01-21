@@ -40,14 +40,12 @@
  * for more details.
  */
 
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ox_coi/src/adaptiveWidgets/adaptive_icon.dart';
-import 'package:ox_coi/src/adaptiveWidgets/adaptive_icon_button.dart';
 import 'package:ox_coi/src/data/config.dart';
+import 'package:ox_coi/src/flagged/flagged.dart';
 import 'package:ox_coi/src/invite/invite_bloc.dart';
 import 'package:ox_coi/src/invite/invite_event_state.dart';
 import 'package:ox_coi/src/l10n/l.dart';
@@ -59,12 +57,14 @@ import 'package:ox_coi/src/qr/qr.dart';
 import 'package:ox_coi/src/ui/color.dart';
 import 'package:ox_coi/src/ui/custom_theme.dart';
 import 'package:ox_coi/src/user/user_bloc.dart';
+import 'package:ox_coi/src/user/user_change_bloc.dart';
+import 'package:ox_coi/src/user/user_change_event_state.dart' as UserChange;
 import 'package:ox_coi/src/user/user_event_state.dart';
 import 'package:ox_coi/src/user/user_settings.dart';
-import 'package:ox_coi/src/utils/keyMapping.dart';
 import 'package:ox_coi/src/widgets/fullscreen_progress.dart';
-import 'package:ox_coi/src/widgets/placeholder_text.dart';
+import 'package:ox_coi/src/widgets/group_header.dart';
 import 'package:ox_coi/src/widgets/profile_header.dart';
+import 'package:ox_coi/src/widgets/settings_item.dart';
 
 class UserProfile extends RootChild {
   UserProfile({appBarActionsStream, Key key}) : super(appBarActionsStream: appBarActionsStream, key: key);
@@ -99,42 +99,22 @@ class UserProfile extends RootChild {
 
   @override
   List<Widget> getActions(BuildContext context) {
-    return [
-      AdaptiveIconButton(
-        icon: AdaptiveIcon(
-          icon: IconSource.settings,
-        ),
-        onPressed: () => appBarActionsStream.add(AppBarAction.profileSettings),
-        key: Key(keyUserProfileSettingsAdaptiveIcon),
-      ),
-    ];
+    return null;
   }
 }
 
 class _ProfileState extends State<UserProfile> {
   UserBloc _userBloc = UserBloc();
+  UserChangeBloc _userChangeBloc = UserChangeBloc();
   Navigation navigation = Navigation();
   InviteBloc _inviteBloc = InviteBloc();
   OverlayEntry _fullScreenOverlayEntry;
-  StreamSubscription appBarActionsSubscription;
 
   @override
   void initState() {
     super.initState();
     navigation.current = Navigatable(Type.profile);
     _userBloc.add(RequestUser());
-    appBarActionsSubscription = widget.appBarActionsStream.stream.listen((data) {
-      var action = data as AppBarAction;
-      if (action == AppBarAction.profileSettings) {
-        _actionSettings();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    appBarActionsSubscription.cancel();
-    super.dispose();
   }
 
   @override
@@ -173,42 +153,106 @@ class _ProfileState extends State<UserProfile> {
                   padding: const EdgeInsets.only(top: 24.0),
                   child: Column(
                     children: <Widget>[
-                      Stack(
-                        children: <Widget>[
-                          Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                ProfileData(
-                                  color: CustomTheme.of(context).onBackground.withOpacity(barely),
-                                  avatarPath: config.avatarPath,
-                                  child: NewProfileAvatar(),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.only(top: 24.0, bottom: 8.0),
-                                  child: PlaceholderText(
-                                    text: config.username,
-                                    style: Theme.of(context).textTheme.body1.apply(color: CustomTheme.of(context).onSurface),
-                                    align: TextAlign.center,
-                                    placeholderText: L10n.get(L.profileNoUsername),
-                                    placeholderStyle:
-                                    Theme.of(context).textTheme.body1.apply(color: CustomTheme.of(context).onSurface.withOpacity(disabled)),
-                                    placeHolderAlign: TextAlign.center,
-                                  ),
-                                ),
-                                ProfileData(
-                                  text: config.email,
-                                  textStyle: Theme.of(context).textTheme.caption.apply(color: CustomTheme.of(context).onSurface.withOpacity(fade)),
-                                  child: ProfileHeaderText(),
-                                ),
-                              ],
-                            ),
-                          ),
-                          ProfileData(
-                            child: ProfileHeaderEditButton(),
-                          ),
-                        ],
+                      ProfileData(
+                        text: config.username,
+                        secondText: config.email,
+                        avatarPath: config.avatarPath,
+                        placeholderText: L10n.get(L.profileNoUsername),
+                        imageBackgroundcolor: CustomTheme.of(context).onBackground.withOpacity(barely),
+                        imageActionCallback: _editPhotoCallback,
+                        withPlaceholder: true,
+                        editActionCallback: () => editUserSettings(),
+                        child: ProfileHeader(),
+                      ),
+                      SettingsItem(
+                        icon: IconSource.flag,
+                        text: L10n.get(L.settingItemFlaggedTitle),
+                        iconBackground: CustomTheme.of(context).flagIcon,
+                        onTap: () => _settingsItemTapped(context, SettingsItemName.flagged),
+                      ),
+                      SettingsItem(
+                        icon: IconSource.qr,
+                        text: L10n.get(L.settingItemQRTitle),
+                        iconBackground: CustomTheme.of(context).qrIcon,
+                        onTap: () => _settingsItemTapped(context, SettingsItemName.qrShow),
+                      ),
+                      SettingsItem(
+                        icon: IconSource.personAdd,
+                        text: L10n.get(L.settingItemInviteTitle),
+                        iconBackground: CustomTheme.of(context).inviteIcon,
+                        onTap: () => _settingsItemTapped(context, SettingsItemName.invite),
+                      ),
+                      GroupHeader(
+                        text: L10n.get(L.settingGroupHeaderGeneralTitle),
+                      ),
+                      SettingsItem(
+                        icon: IconSource.notifications,
+                        text: L10n.get(L.settingItemNotificationsTitle),
+                        iconBackground: CustomTheme.of(context).notificationIcon,
+                        onTap: () => _settingsItemTapped(context, SettingsItemName.notification),
+                      ),
+                      SettingsItem(
+                        icon: IconSource.chat,
+                        text: L10n.get(L.settingItemChatTitle),
+                        iconBackground: CustomTheme.of(context).chatIcon,
+                        onTap: () => _settingsItemTapped(context, SettingsItemName.chat),
+                      ),
+                      GroupHeader(
+                        text: L10n.get(L.settingGroupHeaderEmailTitle),
+                      ),
+                      SettingsItem(
+                        icon: IconSource.signature,
+                        text: L10n.get(L.settingItemSignatureTitle),
+                        iconBackground: CustomTheme.of(context).signatureIcon,
+                        onTap: () => _settingsItemTapped(context, SettingsItemName.signature),
+                      ),
+                      SettingsItem(
+                        icon: IconSource.serverSetting,
+                        text: L10n.get(L.settingItemServerSettingsTitle),
+                        iconBackground: CustomTheme.of(context).serverSettingsIcon,
+                        onTap: () => _settingsItemTapped(context, SettingsItemName.serverSetting),
+                      ),
+                      SettingsItem(
+                        icon: IconSource.darkMode,
+                        text: L10n.get(L.settingItemDarkModeTitle),
+                        iconBackground: CustomTheme.of(context).darkModeIcon,
+                        onTap: () => _settingsItemTapped(context, SettingsItemName.darkMode),
+                      ),
+                      GroupHeader(
+                        text: L10n.get(L.settingGroupHeaderSecurityTitle),
+                      ),
+                      SettingsItem(
+                        icon: IconSource.security,
+                        text: L10n.get(L.settingItemDataProtectionTitle),
+                        iconBackground: CustomTheme.of(context).dataProtectionIcon,
+                        onTap: () => _settingsItemTapped(context, SettingsItemName.dataProtection),
+                      ),
+                      SettingsItem(
+                        icon: IconSource.block,
+                        text: L10n.get(L.settingItemBlockedTitle),
+                        iconBackground: CustomTheme.of(context).blockIcon,
+                        onTap: () => _settingsItemTapped(context, SettingsItemName.blocked),
+                      ),
+                      SettingsItem(
+                        icon: IconSource.lock,
+                        text: L10n.get(L.settingItemEncryptionTitle),
+                        iconBackground: CustomTheme.of(context).encryptionIcon,
+                        onTap: () => _settingsItemTapped(context, SettingsItemName.encryption),
+                      ),
+                      GroupHeader(
+                        text: "",
+                      ),
+                      SettingsItem(
+                        icon: IconSource.info,
+                        text: L10n.get(L.settingItemAboutTitle),
+                        iconBackground: CustomTheme.of(context).aboutIcon,
+                        onTap: () => _settingsItemTapped(context, SettingsItemName.about),
+                      ),
+                      SettingsItem(
+                        icon: IconSource.feedback,
+                        text: L10n.get(L.settingItemFeedbackTitle),
+                        iconBackground: CustomTheme.of(context).feedbackIcon,
+                        onTap: () => _settingsItemTapped(context, SettingsItemName.feedback),
                       ),
                     ],
                   ),
@@ -221,75 +265,57 @@ class _ProfileState extends State<UserProfile> {
     );
   }
 
-  /*Padding(
-              padding: EdgeInsets.symmetric(vertical: profileSectionsVerticalPadding),
-              child: buildAvatar(config),
-            ),
-            PlaceholderText(
-              text: config.username,
-              style: Theme.of(context).textTheme.headline,
-              align: TextAlign.center,
-              placeholderText: L10n.get(L.profileNoUsername),
-              placeholderStyle: Theme.of(context).textTheme.headline.apply(color: CustomTheme.of(context).onBackground.withOpacity(disabled)),
-              placeHolderAlign: TextAlign.center,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: profileVerticalPadding),
-              child: Text(
-                config.email,
-                style: Theme.of(context).textTheme.subhead,
-                key: Key(keyUserProfileEmailText),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: profileSectionsVerticalPadding),
-              child: PlaceholderText(
-                text: config.status,
-                align: TextAlign.center,
-                style: Theme.of(context).textTheme.subhead,
-                placeholderText: L10n.get(L.profileNoSignature),
-                placeholderStyle: Theme.of(context).textTheme.subhead.apply(color: CustomTheme.of(context).onBackground.withOpacity(disabled)),
-                placeHolderAlign: TextAlign.center,
-              ),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                AdaptiveRaisedButton(
-                  child: Text(L10n.get(L.profileEdit)),
-                  onPressed: editUserSettings,
-                  color: CustomTheme.of(context).accent,
-                  textColor: CustomTheme.of(context).onAccent,
-                  key: Key(keyUserProfileEditProfileRaisedButton),
-                ),
-                Padding(padding: EdgeInsets.all(chatProfileButtonPadding)),
-                AdaptiveRaisedButton(
-                  child: Text(L10n.get(L.qrProfile)),
-                  onPressed: showQr,
-                  color: CustomTheme.of(context).accent,
-                  textColor: CustomTheme.of(context).onAccent,
-                  key: Key(keyUserProfileShowQrRaisedButton),
-                ),
-              ],
-            ),
-            Padding(padding: EdgeInsets.only(top: 10.0)),
-            AdaptiveRaisedButton(
-              child: Text(L10n.get(L.profileShareInviteUrl)),
-              onPressed: createInviteUrl,
-              color: CustomTheme.of(context).accent,
-              textColor: CustomTheme.of(context).onAccent,
-              key: Key(""),
-            ),*/
-  ProfileData buildAvatar(Config config) {
-    return ProfileData(
-        color: CustomTheme.of(context).accent,
-        child: ProfileAvatar(
-          imagePath: config.avatarPath,
-        ));
+  _settingsItemTapped(BuildContext context, SettingsItemName settingsItemName) {
+    switch (settingsItemName) {
+      case SettingsItemName.flagged:
+        navigation.push(
+          context,
+          MaterialPageRoute(builder: (context) => Flagged()),
+        );
+        break;
+      case SettingsItemName.qrShow:
+        navigation.push(
+          context,
+          MaterialPageRoute(builder: (context) => QrCode(chatId: 0)),
+        );
+        break;
+      case SettingsItemName.invite:
+        createInviteUrl();
+        break;
+      case SettingsItemName.notification:
+        navigation.pushNamed(context, Navigation.settingsNotifications);
+        break;
+      case SettingsItemName.chat:
+        navigation.pushNamed(context, Navigation.settingsChat);
+        break;
+      case SettingsItemName.signature:
+        break;
+      case SettingsItemName.serverSetting:
+        navigation.pushNamed(context, Navigation.settingsAccount);
+        break;
+      case SettingsItemName.darkMode:
+        navigation.pushNamed(context, Navigation.settingsChat);
+        break;
+      case SettingsItemName.dataProtection:
+        navigation.pushNamed(context, Navigation.settingsAntiMobbing);
+        break;
+      case SettingsItemName.blocked:
+        navigation.pushNamed(context, Navigation.contactsBlocked);
+        break;
+      case SettingsItemName.encryption:
+        navigation.pushNamed(context, Navigation.settingsSecurity);
+        break;
+      case SettingsItemName.about:
+        navigation.pushNamed(context, Navigation.settingsAbout);
+        break;
+      case SettingsItemName.feedback:
+        navigation.pushNamed(context, Navigation.settingsAbout);
+        break;
+    }
   }
 
-  _actionSettings() {
-    navigation.pushNamed(context, Navigation.settings);
+  _editPhotoCallback(String avatarPath) {
+    _userChangeBloc.add(UserChange.UserAvatarChanged(avatarPath: avatarPath));
   }
 
   editUserSettings() {
