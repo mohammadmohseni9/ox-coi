@@ -58,6 +58,7 @@ class BrandedTheme {
   final Color encryptionIcon = Colors.red[600];
   final Color aboutIcon = Colors.deepOrange[500];
   final Color feedbackIcon = Colors.amber[600];
+  final Color bugReportIcon = Colors.red[600];
   final Color accent;
   final Color onAccent;
   final Color info;

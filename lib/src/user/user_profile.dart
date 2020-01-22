@@ -53,9 +53,12 @@ import 'package:ox_coi/src/l10n/l10n.dart';
 import 'package:ox_coi/src/main/root_child.dart';
 import 'package:ox_coi/src/navigation/navigatable.dart';
 import 'package:ox_coi/src/navigation/navigation.dart';
+import 'package:ox_coi/src/platform/preferences.dart';
 import 'package:ox_coi/src/qr/qr.dart';
+import 'package:ox_coi/src/settings/settings_signature.dart';
 import 'package:ox_coi/src/ui/color.dart';
 import 'package:ox_coi/src/ui/custom_theme.dart';
+import 'package:ox_coi/src/ui/strings.dart';
 import 'package:ox_coi/src/user/user_bloc.dart';
 import 'package:ox_coi/src/user/user_change_bloc.dart';
 import 'package:ox_coi/src/user/user_change_event_state.dart' as UserChange;
@@ -65,6 +68,7 @@ import 'package:ox_coi/src/widgets/fullscreen_progress.dart';
 import 'package:ox_coi/src/widgets/group_header.dart';
 import 'package:ox_coi/src/widgets/profile_header.dart';
 import 'package:ox_coi/src/widgets/settings_item.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UserProfile extends RootChild {
   UserProfile({appBarActionsStream, Key key}) : super(appBarActionsStream: appBarActionsStream, key: key);
@@ -161,7 +165,7 @@ class _ProfileState extends State<UserProfile> {
                         imageBackgroundcolor: CustomTheme.of(context).onBackground.withOpacity(barely),
                         imageActionCallback: _editPhotoCallback,
                         withPlaceholder: true,
-                        editActionCallback: () => editUserSettings(),
+                        editActionCallback: () => _editUserSettings(),
                         child: ProfileHeader(),
                       ),
                       SettingsItem(
@@ -184,6 +188,14 @@ class _ProfileState extends State<UserProfile> {
                       ),
                       GroupHeader(
                         text: L10n.get(L.settingGroupHeaderGeneralTitle),
+                      ),
+                      SettingsItem(
+                        icon: IconSource.darkMode,
+                        text: L10n.get(L.settingItemDarkModeTitle),
+                        iconBackground: CustomTheme.of(context).darkModeIcon,
+                        onTap: () => _changeTheme(),
+                        showSwitch: true,
+                        onSwitchChanged: () => _changeTheme(),
                       ),
                       SettingsItem(
                         icon: IconSource.notifications,
@@ -211,12 +223,6 @@ class _ProfileState extends State<UserProfile> {
                         text: L10n.get(L.settingItemServerSettingsTitle),
                         iconBackground: CustomTheme.of(context).serverSettingsIcon,
                         onTap: () => _settingsItemTapped(context, SettingsItemName.serverSetting),
-                      ),
-                      SettingsItem(
-                        icon: IconSource.darkMode,
-                        text: L10n.get(L.settingItemDarkModeTitle),
-                        iconBackground: CustomTheme.of(context).darkModeIcon,
-                        onTap: () => _settingsItemTapped(context, SettingsItemName.darkMode),
                       ),
                       GroupHeader(
                         text: L10n.get(L.settingGroupHeaderSecurityTitle),
@@ -254,6 +260,12 @@ class _ProfileState extends State<UserProfile> {
                         iconBackground: CustomTheme.of(context).feedbackIcon,
                         onTap: () => _settingsItemTapped(context, SettingsItemName.feedback),
                       ),
+                      SettingsItem(
+                        icon: IconSource.bugReport,
+                        text: L10n.get(L.settingItemBugReportTitle),
+                        iconBackground: CustomTheme.of(context).bugReportIcon,
+                        onTap: () => _settingsItemTapped(context, SettingsItemName.bugReport),
+                      ),
                     ],
                   ),
                 ),
@@ -289,6 +301,10 @@ class _ProfileState extends State<UserProfile> {
         navigation.pushNamed(context, Navigation.settingsChat);
         break;
       case SettingsItemName.signature:
+        navigation.push(
+          context,
+          MaterialPageRoute(builder: (context) => EmailSignature()),
+        );
         break;
       case SettingsItemName.serverSetting:
         navigation.pushNamed(context, Navigation.settingsAccount);
@@ -309,16 +325,26 @@ class _ProfileState extends State<UserProfile> {
         navigation.pushNamed(context, Navigation.settingsAbout);
         break;
       case SettingsItemName.feedback:
-        navigation.pushNamed(context, Navigation.settingsAbout);
+        launch(featureRequestUrl, forceSafariVC: false);
+        break;
+      case SettingsItemName.bugReport:
+        launch(issueUrl, forceSafariVC: false);
         break;
     }
+  }
+
+  void _changeTheme() async{
+    ThemeKey actualKey = CustomTheme.instanceOf(context).actualThemeKey;
+    var newTheme = actualKey == ThemeKey.DARK ? ThemeKey.LIGHT : ThemeKey.DARK;
+    await setPreference(preferenceAppThemeKey, newTheme.toString());
+    CustomTheme.instanceOf(context).changeTheme(newTheme);
   }
 
   _editPhotoCallback(String avatarPath) {
     _userChangeBloc.add(UserChange.UserAvatarChanged(avatarPath: avatarPath));
   }
 
-  editUserSettings() {
+  _editUserSettings() {
     navigation.push(
       context,
       MaterialPageRoute(builder: (context) => UserSettings()),

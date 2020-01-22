@@ -372,6 +372,7 @@ class L {
   static final settingItemEncryptionTitle = _translationKey("Encryption");
   static final settingItemAboutTitle = _translationKey("About");
   static final settingItemFeedbackTitle = _translationKey("Feedback");
+  static final settingItemBugReportTitle = _translationKey("Report a bug");
 
 
   static List<String> _translationKey(String key, [String pluralKey]) {

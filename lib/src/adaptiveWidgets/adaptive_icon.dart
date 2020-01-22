@@ -198,7 +198,7 @@ class AdaptiveIcon extends AdaptiveWidget<Icon, Icon> {
     IconSource.darkMode : [Icons.brightness_2, Icons.brightness_2],
     IconSource.qr : [Icons.filter_center_focus, Icons.filter_center_focus],
     IconSource.signature : [Icons.gesture, Icons.gesture],
-    IconSource.serverSetting : [Icons.router, Icons.router], //TODO: Add the icon account_tree when available
+    IconSource.serverSetting : [Icons.router, Icons.router],
     IconSource.feedback : [Icons.feedback, Icons.feedback],
   };
 

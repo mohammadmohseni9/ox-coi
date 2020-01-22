@@ -72,6 +72,7 @@ class ProfileData extends InheritedWidget {
   final Function editActionCallback;
   final String avatarPath;
   final bool withPlaceholder;
+  final bool showWhiteImageIcon;
 
   const ProfileData({
     Key key,
@@ -87,6 +88,7 @@ class ProfileData extends InheritedWidget {
     this.editActionCallback,
     this.avatarPath,
     this.withPlaceholder = false,
+    this.showWhiteImageIcon = false,
   })  : assert(child != null),
         super(key: key, child: child);
 
@@ -144,9 +146,7 @@ class ProfileHeader extends StatelessWidget {
 }
 
 class ProfileAvatar extends StatelessWidget {
-  final String imagePath;
-
-  ProfileAvatar({this.imagePath});
+  const ProfileAvatar({Key key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -209,13 +209,16 @@ class ProfileAvatar extends StatelessWidget {
           size: profileAvatarSize,
           textPrimary: ProfileData.of(context).initialsText,
         ),
-        AdaptiveInkWell(
-          child: AdaptiveIcon(
-            icon: IconSource.camera,
-            color: CustomTheme.of(context).accent,
+        Visibility(
+          visible: ProfileData.of(context).imageActionCallback != null,
+          child: AdaptiveInkWell(
+            child: AdaptiveIcon(
+              icon: IconSource.camera,
+              color: ProfileData.of(context).showWhiteImageIcon ? CustomTheme.of(context).white : CustomTheme.of(context).accent,
+            ),
+            onTap: _editPhoto,
           ),
-          onTap: _editPhoto,
-        )
+        ),
       ],
     );
   }
@@ -234,7 +237,7 @@ class ProfileHeaderEditButton extends StatelessWidget {
           icon: IconSource.edit,
           iconColor: CustomTheme.of(context).accent,
         ),
-        onPressed: () => ProfileData.of(context).editActionCallback,
+        onPressed: () => ProfileData.of(context).editActionCallback(),
       ),
     );
   }
